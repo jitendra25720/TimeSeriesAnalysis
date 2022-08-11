@@ -1,0 +1,232 @@
+
+#Time Series Analysis on tata moters
+
+```{r}
+library(ggplot2)
+library(tseries)
+library(imputeTS)
+library(forecast)
+# library(greybox)
+# library(smooth)
+library(graphics)
+library(datasets)
+library(fpp2)
+library(TTR)
+```
+
+```{r}
+#Importing data
+
+data = read.csv("Data/tata_data.csv")
+data
+```
+```{r}
+# Converting data into time-series object
+
+df = ts(data$Sales, start = c(2001,4), frequency = 12)
+df
+```
+
+```{r}
+plot(decompose(df))
+```
+
+
+```{r}
+#Decomposition of time series
+
+df_decom = stl(df, s.window = "p")
+autoplot(df_decom)
+```
+
+
+```{r}
+#Simple exponential smoothing method
+
+df_ses = ses(df, h=12)
+
+autoplot(df_ses)+ xlab("Time")+ ylab("Revenue")+theme(panel.background = element_rect(fill = "gray", colour = "red"), axis.text.x = element_text(colour = "blue"),axis.text.y = element_text(colour = "blue"), axis.title.x.bottom = element_text(colour = "red"), axis.title.y.left = element_text(color = "red"))
+```
+
+
+
+```{r}
+summary(df_ses)
+```
+
+
+```{r}
+#Double exponential exponential smoothing
+
+df_dex = holt(df, h = 12)
+df_dex
+```
+
+
+```{r}
+autoplot(df_dex)+ xlab("Time")+ ylab("Revenue")+theme(panel.background = element_rect(fill = "gray", colour = "red"), axis.text.x = element_text(colour = "blue"),axis.text.y = element_text(colour = "blue"), axis.title.x.bottom = element_text(colour = "red"), axis.title.y.left = element_text(color = "red"))
+```
+
+
+```{r}
+summary(df_dex)
+```
+
+```{r}
+# Triple(Hold Winter)exponential smoothing
+
+df_hw = hw(df, h=12)
+df_hw
+```
+
+
+```{r}
+autoplot(df_hw)+ xlab("Time")+ ylab("Revenue")+theme(panel.background = element_rect(fill = "gray", colour = "red"), axis.text.x = element_text(colour = "blue"),axis.text.y = element_text(colour = "blue"), axis.title.x.bottom = element_text(colour = "red"), axis.title.y.left = element_text(color = "red"))
+```
+
+
+```{r}
+summary(df_hw)
+```
+
+
+```{r}
+# Training and testing of data for holt-Winter 
+
+df_train = window(df,start = c(2013,4), end = c(2021,2), frequency = 12)
+df_train
+```
+
+
+```{r}
+df_test = window(df, start = c(2021,3), frequency = 12)
+df_test
+```
+
+
+```{r}
+df_hw_train = hw(df_train,h = 12)
+df_hw_train
+```
+
+
+```{r}
+autoplot(df_hw_train)
+```
+
+
+```{r}
+accuracy(df_hw_train, df_test)
+```
+
+
+```{r}
+plot(df_hw_train)
+lines(df_test)
+```
+```{r}
+summary(df_hw_train)
+```
+
+
+```{r}
+df_hw_train2 = hw(df_train, alpha = 0.62, beta = .02, gamma = .1, h=12)
+plot(df_hw_train2)
+lines(df_test)
+```
+
+
+```{r}
+```
+
+#ARIMA Model
+
+```{r}
+lags = window(df, start = c(2006,4))
+lags
+```
+
+
+```{r}
+gglagplot(lags)
+```
+
+
+```{r}
+ggAcf(lags)
+```
+
+
+```{r}
+#Checking stationarity of the data
+
+#H0 : Data is not stationary
+#H1 : Data is stationary
+
+adf.test(df)
+```
+
+
+```{r}
+# First order diffrencing
+df_diff = diff(df_train,1)
+
+autoplot(df_diff)
+```
+
+
+```{r}
+adf.test(df_diff, alternative = "stationary" ,k=0)
+```
+```{r}
+autoarima.fit.train = auto.arima(df_diff, trace = FALSE, stationary = TRUE, ic="bic")
+autoarima.fit.train
+```
+
+
+```{r}
+acf(df_diff)
+pacf(df_diff)
+```
+
+
+```{r}
+auto_arima_train= auto.arima(df_train, ic="bic", trace = TRUE)
+```
+
+
+```{r}
+arima_forecast = forecast(auto_arima_train,h=12)
+arima_forecast
+```
+
+```{r}
+plot(arima_forecast)
+lines(df, col="red")
+```
+
+
+
+
+# Using Moving average method 
+```{r}
+moving_avg = SMA(df_train,n = 3)
+moving_avg
+```
+```{r}
+forecast_ma = forecast(moving_avg,h=12)
+forecast_ma
+```
+
+
+```{r}
+plot(forecast_ma)
+lines(df, col = "red")
+```
+
+
+```{r}
+accuracy(forecast_ma, df)
+
+
+
