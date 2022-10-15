@@ -1,5 +1,5 @@
 
-#Time Series Analysis on tata moters
+# Time Series Analysis on Tata motors sales
 
 ```{r}
 library(ggplot2)
@@ -13,16 +13,13 @@ library(datasets)
 library(fpp2)
 library(TTR)
 ```
-
+## Importing data
 ```{r}
-#Importing data
-
 data = read.csv("Data/tata_data.csv")
-data
+head(data)
 ```
+## Converting data into time-series object
 ```{r}
-# Converting data into time-series object
-
 df = ts(data$Sales, start = c(2001,4), frequency = 12)
 df
 ```
@@ -31,18 +28,14 @@ df
 plot(decompose(df))
 ```
 
-
+## Decomposition of time series
 ```{r}
-#Decomposition of time series
-
 df_decom = stl(df, s.window = "p")
 autoplot(df_decom)
 ```
 
-
+## Simple exponential smoothing method
 ```{r}
-#Simple exponential smoothing method
-
 df_ses = ses(df, h=12)
 
 autoplot(df_ses)+ xlab("Time")+ ylab("Revenue")+theme(panel.background = element_rect(fill = "gray", colour = "red"), axis.text.x = element_text(colour = "blue"),axis.text.y = element_text(colour = "blue"), axis.title.x.bottom = element_text(colour = "red"), axis.title.y.left = element_text(color = "red"))
@@ -54,10 +47,8 @@ autoplot(df_ses)+ xlab("Time")+ ylab("Revenue")+theme(panel.background = element
 summary(df_ses)
 ```
 
-
+## Double exponential exponential smoothing
 ```{r}
-#Double exponential exponential smoothing
-
 df_dex = holt(df, h = 12)
 df_dex
 ```
@@ -71,10 +62,8 @@ autoplot(df_dex)+ xlab("Time")+ ylab("Revenue")+theme(panel.background = element
 ```{r}
 summary(df_dex)
 ```
-
+## Triple(Hold Winter)exponential smoothing
 ```{r}
-# Triple(Hold Winter)exponential smoothing
-
 df_hw = hw(df, h=12)
 df_hw
 ```
@@ -88,11 +77,8 @@ autoplot(df_hw)+ xlab("Time")+ ylab("Revenue")+theme(panel.background = element_
 ```{r}
 summary(df_hw)
 ```
-
-
+## Training and testing of data for holt-Winter 
 ```{r}
-# Training and testing of data for holt-Winter 
-
 df_train = window(df,start = c(2013,4), end = c(2021,2), frequency = 12)
 df_train
 ```
@@ -139,7 +125,7 @@ lines(df_test)
 ```{r}
 ```
 
-#ARIMA Model
+## ARIMA Model
 
 ```{r}
 lags = window(df, start = c(2006,4))
@@ -155,20 +141,14 @@ gglagplot(lags)
 ```{r}
 ggAcf(lags)
 ```
-
-
+## Checking stationarity of the data
+### H0 : Data is not stationary
+### H1 : Data is stationary
 ```{r}
-#Checking stationarity of the data
-
-#H0 : Data is not stationary
-#H1 : Data is stationary
-
 adf.test(df)
 ```
-
-
+## First order diffrencing
 ```{r}
-# First order diffrencing
 df_diff = diff(df_train,1)
 
 autoplot(df_diff)
@@ -208,7 +188,7 @@ lines(df, col="red")
 
 
 
-# Using Moving average method 
+## Using Moving average method 
 ```{r}
 moving_avg = SMA(df_train,n = 3)
 moving_avg
@@ -227,6 +207,10 @@ lines(df, col = "red")
 
 ```{r}
 accuracy(forecast_ma, df)
+```
 
+
+```{r}
+```
 
 
